@@ -57,7 +57,7 @@ npm start
 ## API Endpoints
 
 1. Create a New User
-    URL: /users
+    URL: api/users
     Method: POST
     Request Body:
     ``` json
@@ -75,7 +75,26 @@ npm start
 
 2. Get a User by ID
 
-    URL: /users/:id
+    URL: api/users/:id
+    Method: GET
+    Response:
+    ```json
+    [
+        {
+            "id": "user_id_1",
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+        },
+        {
+            "id": "user_id_2",
+            "name": "Jane Smith",
+            "email": "jane.smith@example.com"
+        }
+    ]
+
+3. Get All Users
+
+    URL: api/users
     Method: GET
     Response:
     ```json
