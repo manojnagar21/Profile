@@ -125,10 +125,13 @@ This project uses the zod library for validation. The schemas for validating use
     /config
         config.ts
         data-source.ts
+        ormconfig.json
     /controllers
         userController.ts
     /helpers
         cacheHelper.ts
+    /libraries
+        someLibrary.ts
     /models
         User.ts
     /routes
