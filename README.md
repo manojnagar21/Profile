@@ -33,7 +33,6 @@ npm install
 1. Create a .env file in the root directory and add the following variables:
 
 # MongoDB
-MONGODB_URI=mongodb://localhost:27017/yourdbname
 MONGODB_HOST=127.0.0.1
 MONGODB_PORT=27017
 MONGODB_DATABASE=profile
