@@ -34,13 +34,16 @@ npm install
 
 # MongoDB
 MONGODB_URI=mongodb://localhost:27017/yourdbname
-
-# Redis
 MONGODB_HOST=127.0.0.1
 MONGODB_PORT=27017
 MONGODB_DATABASE=profile
 MONGODB_USERNAME=''
 MONGODB_PASSWORD=''
+
+# Redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=''
 
 # Other environment-specific variables
 PORT=3000
