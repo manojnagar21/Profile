@@ -1,4 +1,5 @@
-import { Entity, ObjectIdColumn, Column, ObjectId } from 'typeorm';
+import { Entity, ObjectIdColumn, Column } from 'typeorm';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export class User {
@@ -10,4 +11,7 @@ export class User {
 
     @Column({ unique: true })
     email!: string;
+
+    @Column()
+    password!: string;
 }

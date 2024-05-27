@@ -65,7 +65,8 @@ npm start
     ``` json
     {
         "name": "John Doe",
-        "email": "john.doe@example.com"
+        "email": "john.doe@example.com",
+        "password": "StrongPass123!"
     }
     Response:
     ``` json

@@ -5,6 +5,7 @@ import { getCachedUser, setCachedUser, getCachedUsers, setCachedUsers } from '..
 import { ObjectId } from 'mongodb';
 import { createUserSchema, getUserSchema } from '../schemas/userSchema';
 import { z } from 'zod';
+import bcrypt from 'bcrypt';
 
 const userController = Router();
 const userRepository = AppDataSource.getMongoRepository(User);
@@ -12,8 +13,7 @@ const userRepository = AppDataSource.getMongoRepository(User);
 // Create a new user
 userController.post('/', async (req: Request, res: Response) => {
     try {
-        const { name, email } = createUserSchema.parse(req.body);
-
+        const { name, email, password } = createUserSchema.parse(req.body);
 
 
         const existingUser = await userRepository.findOne({ where: { email } });
@@ -21,11 +21,15 @@ userController.post('/', async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Email already in use' });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = new User();
         user.name = name;
         user.email = email;
+        user.password = hashedPassword;
 
         const savedUser = await userRepository.save(user);
+        delete (savedUser as {password?: string}).password;
         await setCachedUser(savedUser.id.toString(), JSON.stringify(savedUser));
         res.status(201).json(savedUser);
     } catch (error) {
