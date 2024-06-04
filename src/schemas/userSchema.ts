@@ -1,6 +1,9 @@
 // src/schemas/userSchema.ts
 import { z } from 'zod';
 
+
+const mobileNumberRegex = /^\+\d{1,3}\d{4,14}(?:x.+)?$/;
+
 const passwordSchema = z.string().min(8).max(100).regex(/[A-Z]/, 'must contain at least one uppercase letter')
     .regex(/[a-z]/, 'must contain at least one lowercase letter')
     .regex(/[0-9]/, 'must contain at least one number')
@@ -10,6 +13,7 @@ export const createUserSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     email: z.string().email('Invalid email address'),
     password: passwordSchema,
+    mobile: z.string().regex(mobileNumberRegex, 'Invalid mobile number with country code')
 });
 
 export const getUserSchema = z.object({

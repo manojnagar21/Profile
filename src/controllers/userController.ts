@@ -6,14 +6,83 @@ import { ObjectId } from 'mongodb';
 import { createUserSchema, getUserSchema } from '../schemas/userSchema';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
+import { MongoRepository } from 'typeorm';
 
-const userController = Router();
-const userRepository = AppDataSource.getMongoRepository(User);
+const userController: Router = Router();
+const userRepository: MongoRepository<User> = AppDataSource.getMongoRepository(User);
 
+
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *         - mobile
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The auto-generated id of the user
+ *         name:
+ *           type: string
+ *           description: The name of the user
+ *         email:
+ *           type: string
+ *           description: The email of the user
+ *         password:
+ *           type: string
+ *           description: The password of the user
+ *         mobile:
+ *           type: string
+ *           description: The mobile number of the user
+ *       example:
+ *         id: d5fE_asz
+ *         name: John Doe
+ *         email: john.doe@example.com
+ *         password: StrongPass123!
+ *         mobile: "+1234567890"
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management API
+ */
+
+/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Create a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: The user was successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
 // Create a new user
 userController.post('/', async (req: Request, res: Response) => {
     try {
-        const { name, email, password } = createUserSchema.parse(req.body);
+        const { name, email, password, mobile } = createUserSchema.parse(req.body);
 
 
         const existingUser = await userRepository.findOne({ where: { email } });
@@ -23,10 +92,11 @@ userController.post('/', async (req: Request, res: Response) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = new User();
+        const user = new User(name, email, password, mobile);
         user.name = name;
         user.email = email;
         user.password = hashedPassword;
+        user.mobile = mobile;
 
         const savedUser = await userRepository.save(user);
         delete (savedUser as {password?: string}).password;
@@ -41,6 +111,33 @@ userController.post('/', async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get a user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: The user description by ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ *       400:
+ *         description: Validation error
+ *       500:
+ *         description: Internal server error
+ */
 // Get a user by ID
 userController.get('/:id', async (req: Request, res: Response) => {
     try {
@@ -56,7 +153,7 @@ userController.get('/:id', async (req: Request, res: Response) => {
         
         const user = await userRepository.findOne({
             where: { _id: new ObjectId(id) },
-            select: ["_id", "name", "email"] // Exclude the password field
+            select: ["_id", "name", "email", "mobile"] // Exclude the password field
         });
 
         if (user) {
@@ -74,6 +171,25 @@ userController.get('/:id', async (req: Request, res: Response) => {
     }
 });
 
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: The list of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       500:
+ *         description: Internal server error
+ */
 // Get all users
 userController.get('/', async (req: Request, res: Response) => {
     try {

@@ -66,14 +66,16 @@ npm start
     {
         "name": "John Doe",
         "email": "john.doe@example.com",
-        "password": "StrongPass123!"
+        "password": "StrongPass123!",
+        "mobile": "+1234567890"
     }
     Response:
     ``` json
     {
         "id": "user_id",
         "name": "John Doe",
-        "email": "john.doe@example.com"
+        "email": "john.doe@example.com",
+        "mobile": "+1234567890"
     }
 
 2. Get a User by ID
@@ -86,12 +88,8 @@ npm start
         {
             "id": "user_id_1",
             "name": "John Doe",
-            "email": "john.doe@example.com"
-        },
-        {
-            "id": "user_id_2",
-            "name": "Jane Smith",
-            "email": "jane.smith@example.com"
+            "email": "john.doe@example.com",
+            "mobile": "+1234567890"
         }
     ]
 
@@ -105,12 +103,14 @@ npm start
         {
             "id": "user_id_1",
             "name": "John Doe",
-            "email": "john.doe@example.com"
+            "email": "john.doe@example.com",
+            "mobile": "+1234567890"
         },
         {
             "id": "user_id_2",
             "name": "Jane Smith",
-            "email": "jane.smith@example.com"
+            "email": "jane.smith@example.com",
+            "mobile": "+1234567890"
         }
     ]
 

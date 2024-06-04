@@ -29,7 +29,7 @@ export const getCachedUsers = async (): Promise<string | null> => {
 
 export const setCachedUsers = async (data: string): Promise<void> => {
     try {
-        await redisClient.set('users', data);
+        await redisClient.set('users', data, { EX: 3600 });
     } catch (err) {
         console.error('Error setting cached users:', err);
     }
