@@ -126,6 +126,12 @@ userController.post('/', async (req: Request, res: Response) => {
  *     summary: Get a user by ID
  *     tags: [Users]
  *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         description: Bearer token
+ *         schema:
+ *           type: string
  *       - in: path
  *         name: id
  *         schema:
