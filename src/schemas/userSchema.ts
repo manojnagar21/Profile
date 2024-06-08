@@ -19,3 +19,8 @@ export const createUserSchema = z.object({
 export const getUserSchema = z.object({
     id: z.string().min(1, 'ID is required').regex(/^[0-9a-fA-F]{24}$/, 'Invalid ID format'),
 });
+
+export const loginUserSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+});

@@ -3,10 +3,13 @@ import { AppDataSource } from '../config/data-source';
 import { User } from '../models/User';
 import { getCachedUser, setCachedUser, getCachedUsers, setCachedUsers } from '../helpers/cacheHelper';
 import { ObjectId } from 'mongodb';
-import { createUserSchema, getUserSchema } from '../schemas/userSchema';
+import { createUserSchema, getUserSchema, loginUserSchema } from '../schemas/userSchema';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { MongoRepository } from 'typeorm';
+
+import { generateToken } from '../helpers/jwtHelper';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const userController: Router = Router();
 const userRepository: MongoRepository<User> = AppDataSource.getMongoRepository(User);
@@ -85,12 +88,17 @@ userController.post('/', async (req: Request, res: Response) => {
         const { name, email, password, mobile } = createUserSchema.parse(req.body);
 
 
-        const existingUser = await userRepository.findOne({ where: { email } });
+        const whereCondition = {
+            $or: [{ email }, { mobile }]
+        };
+
+        const existingUser = await userRepository.findOne({ where: whereCondition });
         if (existingUser) {
-            return res.status(400).json({ message: 'Email already in use' });
+            return res.status(400).json({ message: 'Email or mobile number already in use' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         const user = new User(name, email, password, mobile);
         user.name = name;
@@ -99,7 +107,7 @@ userController.post('/', async (req: Request, res: Response) => {
         user.mobile = mobile;
 
         const savedUser = await userRepository.save(user);
-        delete (savedUser as {password?: string}).password;
+        delete (savedUser as { password?: string }).password;
         await setCachedUser(savedUser._id.toString(), JSON.stringify(savedUser));
         res.status(201).json(savedUser);
     } catch (error) {
@@ -139,7 +147,7 @@ userController.post('/', async (req: Request, res: Response) => {
  *         description: Internal server error
  */
 // Get a user by ID
-userController.get('/:id', async (req: Request, res: Response) => {
+userController.get('/:id', authenticateToken, async (req: Request, res: Response) => {
     try {
         const { id } = getUserSchema.parse(req.params);
 
@@ -150,7 +158,7 @@ userController.get('/:id', async (req: Request, res: Response) => {
         }
 
         // const user = await userRepository.findOneBy({ _id: new ObjectId(id) });
-        
+
         const user = await userRepository.findOne({
             where: { _id: new ObjectId(id) },
             select: ["_id", "name", "email", "mobile"] // Exclude the password field
@@ -211,5 +219,69 @@ userController.get('/', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+/**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: Log in a user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Login successful
+ *                 token:
+ *                   type: string
+ *                   example: your_jwt_token
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Invalid email or password
+ *       500:
+ *         description: Internal server error
+ */
+userController.post('/login', async (req: Request, res: Response) => {
+    try {
+        const { email, password } = loginUserSchema.parse(req.body);
+
+        const user = await userRepository.findOne({ where: { email } });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        const token = generateToken(user._id.toString());
+
+        res.status(200).json({ message: 'Login successful', token });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ message: 'Validation error', errors: error.errors });
+        }
+        console.error('Error logging in user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Protect all user routes
+userController.use(authenticateToken);
 
 export { userController };
