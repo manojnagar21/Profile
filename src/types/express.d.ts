@@ -1,12 +1,11 @@
-// src/express.d.ts
-import * as express from 'express';
+import * as express from "express";
 
-declare global { 
-	namespace Express {
-		interface Request {
-			user?: {
-				userId: string;
-			};
-		}
-	}
+declare global {
+  	namespace Express {
+    	interface Request {
+     	 	user?: {
+        		userId: string;
+      		};
+    	}
+  	}
 }

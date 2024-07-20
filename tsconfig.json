@@ -10,7 +10,7 @@
         "forceConsistentCasingInFileNames": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "typeRoots": ["./node_modules/@types", "./src/types"],
+        "typeRoots": ["./node_modules/@types", "./src/types/express.d.ts"],
     },
     "include": ["src/**/*.ts", "src/types/express.d.ts"],
     "exclude": ["node_modules"]

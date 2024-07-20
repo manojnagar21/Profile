@@ -46,9 +46,9 @@ const userRepository: MongoRepository<User> = AppDataSource.getMongoRepository(U
  *       example:
  *         id: d5fE_asz
  *         name: John Doe
- *         email: john.doe@example.com
- *         password: StrongPass123!
- *         mobile: "+1234567890"
+ *         email: manojnagar25@gmail.com
+ *         password: Ab@09969127092
+ *         mobile: "+9718976483932"
  */
 
 /**
@@ -123,6 +123,14 @@ userController.post('/', async (req: Request, res: Response) => {
  * @swagger
  * /api/users/{id}:
  *   get:
+ *     securityDefinitions:
+ *       Bearer:
+ *        type: apiKey
+ *        description: 'Value: Bearer {jwt}'
+ *        name: Authorization
+ *        in: header
+ *     security:
+ *        - Bearer: []
  *     summary: Get a user by ID
  *     tags: [Users]
  *     parameters:
@@ -155,6 +163,11 @@ userController.post('/', async (req: Request, res: Response) => {
 // Get a user by ID
 userController.get('/:id', authenticateToken, async (req: Request, res: Response) => {
     try {
+        // console.log("aaaaa", req.headers);
+        console.log(req.user);
+        if(req.user?.userId != req.params.id) {
+            return res.status(400).json({ message: 'Authorization token is mismatched with userid' });
+        }
         const { id } = getUserSchema.parse(req.params);
 
         const cachedUser = await getCachedUser(id);
